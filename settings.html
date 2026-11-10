@@ -1,0 +1,1101 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>璃光设置</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body {
+    height: 100%;
+    font-family: "Microsoft YaHei", -apple-system, sans-serif;
+    background: #1a1a1c;
+    color: #e4e4e7;
+    overflow: hidden;
+  }
+  #app { display: flex; height: 100vh; }
+
+  #sidebar {
+    width: 200px;
+    background: #202024;
+    border-right: 1px solid #2e2e33;
+    padding: 18px 0;
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  #sidebar .title {
+    padding: 0 20px 16px;
+    font-size: 15px;
+    font-weight: 700;
+    color: #f4f4f5;
+    letter-spacing: 0.5px;
+  }
+  #sidebar .title span { color: #a78bfa; margin-right: 6px; }
+  .nav-item {
+    padding: 10px 20px;
+    font-size: 13px;
+    color: #a1a1aa;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: all 0.15s;
+    border-left: 2px solid transparent;
+  }
+  .nav-item:hover { background: #29292e; color: #e4e4e7; }
+  .nav-item.active {
+    background: #2d2d33;
+    color: #f4f4f5;
+    border-left-color: #a78bfa;
+  }
+  .nav-item .icon { font-size: 15px; width: 18px; text-align: center; }
+
+  #content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 28px 32px;
+  }
+  #content::-webkit-scrollbar { width: 8px; }
+  #content::-webkit-scrollbar-thumb { background: #3a3a40; border-radius: 4px; }
+
+  .section { display: none; }
+  .section.active { display: block; }
+  .section h2 {
+    font-size: 18px;
+    font-weight: 700;
+    color: #f4f4f5;
+    margin-bottom: 6px;
+  }
+  .section .desc {
+    font-size: 12px;
+    color: #71717a;
+    margin-bottom: 20px;
+  }
+
+  .card {
+    background: #24242a;
+    border: 1px solid #2e2e35;
+    border-radius: 10px;
+    padding: 16px 18px;
+    margin-bottom: 14px;
+  }
+  .card-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+  }
+  .card-row + .card-row {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid #2e2e35;
+  }
+  .card-label { flex: 1; }
+  .card-label .name {
+    font-size: 13px;
+    color: #e4e4e7;
+    margin-bottom: 3px;
+  }
+  .card-label .hint {
+    font-size: 11px;
+    color: #71717a;
+    line-height: 1.4;
+  }
+
+  button {
+    padding: 7px 14px;
+    background: #2e2e35;
+    color: #e4e4e7;
+    border: 1px solid #3a3a42;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.15s;
+    white-space: nowrap;
+  }
+  button:hover { background: #3a3a42; border-color: #4a4a52; }
+  button.primary {
+    background: #7c3aed;
+    border-color: #8b5cf6;
+    color: #fff;
+  }
+  button.primary:hover { background: #8b5cf6; }
+  button.danger {
+    background: #7f1d1d;
+    border-color: #991b1b;
+    color: #fecaca;
+  }
+  button.danger:hover { background: #991b1b; }
+  button.small { padding: 4px 10px; font-size: 11px; }
+
+  .toggle {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 22px;
+    flex-shrink: 0;
+  }
+  .toggle input { display: none; }
+  .toggle .slider {
+    position: absolute;
+    inset: 0;
+    background: #3a3a42;
+    border-radius: 22px;
+    transition: 0.25s;
+    cursor: pointer;
+  }
+  .toggle .slider::before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    left: 3px; top: 3px;
+    background: #a1a1aa;
+    border-radius: 50%;
+    transition: 0.25s;
+  }
+  .toggle input:checked + .slider { background: #7c3aed; }
+  .toggle input:checked + .slider::before {
+    transform: translateX(18px);
+    background: #fff;
+  }
+
+  .btn-group { display: flex; gap: 6px; flex-wrap: wrap; }
+  .btn-group button { padding: 5px 10px; font-size: 11px; }
+  .btn-group button.active {
+    background: #7c3aed;
+    border-color: #8b5cf6;
+    color: #fff;
+  }
+
+  .editor-layout {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 14px;
+    height: 460px;
+  }
+  .scene-list {
+    background: #202024;
+    border: 1px solid #2e2e35;
+    border-radius: 8px;
+    padding: 8px;
+    overflow-y: auto;
+  }
+  .scene-item {
+    padding: 7px 10px;
+    font-size: 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    color: #a1a1aa;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2px;
+  }
+  .scene-item:hover { background: #29292e; color: #e4e4e7; }
+  .scene-item.active { background: #7c3aed; color: #fff; }
+  .scene-item .count { font-size: 10px; opacity: 0.6; }
+  .line-editor {
+    background: #202024;
+    border: 1px solid #2e2e35;
+    border-radius: 8px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+  }
+  .line-editor .header {
+    font-size: 12px;
+    color: #71717a;
+    margin-bottom: 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #2e2e35;
+  }
+  .line-list { flex: 1; overflow-y: auto; margin-bottom: 10px; }
+  .line-item {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 6px;
+    align-items: flex-start;
+  }
+  .line-item textarea {
+    flex: 1;
+    background: #29292e;
+    color: #e4e4e7;
+    border: 1px solid #3a3a42;
+    border-radius: 5px;
+    padding: 7px 10px;
+    font-size: 12px;
+    font-family: inherit;
+    resize: none;
+    min-height: 36px;
+    outline: none;
+  }
+  .line-item textarea:focus { border-color: #8b5cf6; }
+  .line-item .del {
+    padding: 6px 8px;
+    font-size: 11px;
+    background: transparent;
+    border: 1px solid #3a3a42;
+    color: #a1a1aa;
+  }
+  .line-item .del:hover {
+    background: #7f1d1d;
+    border-color: #991b1b;
+    color: #fecaca;
+  }
+  .editor-actions {
+    display: flex;
+    gap: 8px;
+    padding-top: 10px;
+    border-top: 1px solid #2e2e35;
+  }
+
+  .tip {
+    font-size: 11px;
+    color: #71717a;
+    background: #202024;
+    border-left: 3px solid #7c3aed;
+    padding: 10px 14px;
+    border-radius: 5px;
+    line-height: 1.6;
+    margin-bottom: 14px;
+  }
+
+  .stats-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    margin-bottom: 14px;
+  }
+  .stat-box {
+    background: #202024;
+    border: 1px solid #2e2e35;
+    border-radius: 8px;
+    padding: 14px;
+    text-align: center;
+  }
+  .stat-box .num {
+    font-size: 22px;
+    font-weight: 700;
+    color: #a78bfa;
+    margin-bottom: 4px;
+  }
+  .stat-box .label { font-size: 11px; color: #71717a; }
+  .stat-box.gray .num { color: #71717a; }
+
+  table.feedback-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  table.feedback-table th {
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 500;
+    color: #71717a;
+    background: #202024;
+    border-bottom: 1px solid #2e2e35;
+    position: sticky;
+    top: 0;
+  }
+  table.feedback-table th.right { text-align: right; }
+  table.feedback-table td {
+    padding: 7px 12px;
+    color: #e4e4e7;
+    border-bottom: 1px solid #2e2e35;
+  }
+  table.feedback-table td.right { text-align: right; }
+  table.feedback-table tr:last-child td { border-bottom: none; }
+  table.feedback-table td.muted { color: #52525b; font-size: 11px; }
+  table.feedback-table td.count { color: #a78bfa; font-weight: 600; }
+  table.feedback-table td.count.zero { color: #52525b; font-weight: 400; }
+  .table-wrap {
+    max-height: 340px;
+    overflow-y: auto;
+    background: #24242a;
+    border: 1px solid #2e2e35;
+    border-radius: 8px;
+  }
+
+  #toast {
+    position: fixed;
+    bottom: 24px;
+    left: 50%;
+    transform: translateX(-50%) translateY(80px);
+    background: #7c3aed;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-size: 13px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.4);
+    transition: transform 0.3s;
+    z-index: 9999;
+  }
+  #toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div id="app">
+  <aside id="sidebar">
+    <div class="title"><span>✨</span>璃光设置</div>
+    <div class="nav-item active" data-section="appearance"><span class="icon">🎨</span>外观</div>
+    <div class="nav-item" data-section="behavior"><span class="icon">⚙️</span>行为</div>
+    <div class="nav-item" data-section="assets"><span class="icon">📁</span>素材</div>
+    <div class="nav-item" data-section="dialogues"><span class="icon">💬</span>台词</div>
+    <div class="nav-item" data-section="tools"><span class="icon">🍅</span>工具</div>
+    <div class="nav-item" data-section="feedback"><span class="icon">📊</span>反馈</div>
+    <div class="nav-item" data-section="advanced"><span class="icon">🔧</span>高级</div>
+    <div class="nav-item" data-section="about"><span class="icon">ℹ️</span>关于</div>
+  </aside>
+
+  <main id="content">
+
+    <!-- 外观 -->
+    <section class="section active" data-section="appearance">
+      <h2>外观</h2>
+      <div class="desc">调整璃光在桌面上的显示效果</div>
+
+      <div class="card">
+        <div class="card-label">
+          <div class="name">窗口大小</div>
+          <div class="hint" id="sizeHint">当前：100%</div>
+        </div>
+        <div class="btn-group" id="sizeGroup" style="margin-top: 10px;">
+          <button data-size="0.6">60%</button>
+          <button data-size="0.8">80%</button>
+          <button data-size="1.0" class="active">100%</button>
+          <button data-size="1.25">125%</button>
+          <button data-size="1.5">150%</button>
+          <button data-size="2.0">200%</button>
+        </div>
+        <div style="margin-top: 10px;"><button class="small" id="btnResetSize">重置大小</button></div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">
+          <div class="name">气泡文字大小</div>
+          <div class="hint">影响台词气泡里的字号</div>
+        </div>
+        <div class="btn-group" id="bubbleSizeGroup" style="margin-top: 10px;">
+          <button data-size="12">小 12px</button>
+          <button data-size="14" class="active">中 14px</button>
+          <button data-size="16">大 16px</button>
+          <button data-size="20">超大 20px</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">
+          <div class="name">气泡位置</div>
+          <div class="hint">气泡相对璃光的位置</div>
+        </div>
+        <div class="btn-group" id="bubblePosGroup" style="margin-top: 10px;">
+          <button data-pos="top" class="active">头顶</button>
+          <button data-pos="top-right">右上</button>
+          <button data-pos="top-left">左上</button>
+          <button data-pos="right">右侧</button>
+          <button data-pos="left">左侧</button>
+        </div>
+        <div style="margin-top: 10px;">
+          <button class="small" id="btnAdjustBubble">调整气泡位置（方向键微调）</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 行为 -->
+    <section class="section" data-section="behavior">
+      <h2>行为</h2>
+      <div class="desc">控制璃光的行为和交互</div>
+
+      <div class="card">
+        <div class="card-row">
+          <div class="card-label">
+            <div class="name">台词气泡</div>
+            <div class="hint">关闭后璃光不会说话</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="cbTalk" checked><span class="slider"></span></label>
+        </div>
+        <div class="card-row">
+          <div class="card-label">
+            <div class="name">锁定位置</div>
+            <div class="hint">开启后不能拖动璃光</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="cbLocked"><span class="slider"></span></label>
+        </div>
+        <div class="card-row">
+          <div class="card-label">
+            <div class="name">始终置顶</div>
+            <div class="hint">璃光永远显示在其他窗口上方</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="cbOnTop" checked><span class="slider"></span></label>
+        </div>
+        <div class="card-row">
+          <div class="card-label">
+            <div class="name">开机自启</div>
+            <div class="hint">开机后自动启动璃光</div>
+          </div>
+          <label class="toggle"><input type="checkbox" id="cbAutoStart"><span class="slider"></span></label>
+        </div>
+      </div>
+    </section>
+
+    <!-- 素材 -->
+    <section class="section" data-section="assets">
+      <h2>素材</h2>
+      <div class="desc">管理璃光的外观素材</div>
+
+      <div class="card">
+        <div class="card-row">
+          <div class="card-label">
+            <div class="name">导入 PSD 文件</div>
+            <div class="hint">换一张新的立绘，会覆盖当前的素材</div>
+          </div>
+          <button class="primary" id="btnImportPsd">选择文件...</button>
+        </div>
+        <div class="card-row">
+          <div class="card-label">
+            <div class="name">重新加载 PSD</div>
+            <div class="hint">在不重启的情况下重新加载当前素材</div>
+          </div>
+          <button id="btnReloadPsd">重新加载</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 台词 -->
+    <section class="section" data-section="dialogues">
+      <h2>台词</h2>
+      <div class="desc">编辑、导入导出璃光说的话</div>
+
+      <div class="card">
+        <div class="card-label">
+          <div class="name">打开台词文件</div>
+          <div class="hint">用记事本打开 dialogues.json（高级用户）</div>
+        </div>
+        <div style="margin-top: 10px;">
+          <button id="btnOpenFile">打开文件</button>
+          <button id="btnReloadDialogues">重新加载台词</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">
+          <div class="name">导入 / 导出</div>
+          <div class="hint">备份当前台词，或从外部文件加载</div>
+        </div>
+        <div style="margin-top: 10px;">
+          <button id="btnExportDialogues">导出台词</button>
+          <button id="btnImportDialogues">导入台词</button>
+        </div>
+      </div>
+
+      <div class="tip">💡 修改台词后点击"保存"立即生效，不需要重启宠物。</div>
+
+      <div class="editor-layout">
+        <div class="scene-list" id="sceneList">
+          <div style="padding:20px;text-align:center;color:#71717a;font-size:12px;">加载中...</div>
+        </div>
+        <div class="line-editor">
+          <div class="header" id="editorHeader">场景：请选择</div>
+          <div class="line-list" id="lineList">
+            <div style="padding:20px;text-align:center;color:#71717a;font-size:12px;">请从左侧选择一个场景</div>
+          </div>
+          <div class="editor-actions">
+            <button id="btnAddLine" disabled>+ 添加台词</button>
+            <button class="primary" id="btnSaveScene" style="margin-left:auto;" disabled>保存当前场景</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 工具 -->
+    <section class="section" data-section="tools">
+      <h2>工具</h2>
+      <div class="desc">辅助功能和设置</div>
+
+      <div class="card">
+        <div class="card-row">
+          <div class="card-label">
+            <div class="name">番茄钟设置</div>
+            <div class="hint">修改工作时长和休息时长</div>
+          </div>
+          <button id="btnPomodoro">修改</button>
+        </div>
+        <div class="card-row">
+          <div class="card-label">
+            <div class="name">设置生日</div>
+            <div class="hint">支持公历或农历</div>
+          </div>
+          <button id="btnBirthday">设置</button>
+        </div>
+        <div class="card-row">
+          <div class="card-label">
+            <div class="name">联网更新节日数据</div>
+            <div class="hint">从网络获取最新的节日信息</div>
+          </div>
+          <button id="btnSyncHolidays">更新</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 反馈 -->
+    <section class="section" data-section="feedback">
+      <h2>反馈</h2>
+      <div class="desc">查看台词触发情况，导出报告</div>
+
+      <div class="stats-summary">
+        <div class="stat-box"><div class="num" id="statTotal">-</div><div class="label">总场景数</div></div>
+        <div class="stat-box"><div class="num" id="statFired">-</div><div class="label">已触发</div></div>
+        <div class="stat-box gray"><div class="num" id="statUnfired">-</div><div class="label">未触发</div></div>
+      </div>
+
+      <div class="card">
+        <div class="card-label">
+          <div class="name">导出 / 提交</div>
+          <div class="hint">导出触发报告，方便反馈给作者</div>
+        </div>
+        <div style="margin-top: 10px; display: flex; gap: 8px;">
+          <button class="primary" id="btnExportJson">导出 JSON</button>
+          <button id="btnExportCsv">导出 CSV</button>
+          <button id="btnClearStats">重置统计</button>
+        </div>
+      </div>
+
+      <div class="tip">💡 看看哪些台词从来没触发过，可能条件太苛刻，或者逻辑有问题。</div>
+
+      <div class="table-wrap">
+        <table class="feedback-table">
+          <thead>
+            <tr>
+              <th>场景</th>
+              <th class="right">触发次数</th>
+              <th class="right">最后触发</th>
+            </tr>
+          </thead>
+          <tbody id="statsTable">
+            <tr><td colspan="3" style="text-align:center;padding:20px;color:#71717a;">加载中...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- 高级 -->
+    <section class="section" data-section="advanced">
+      <h2>高级</h2>
+      <div class="desc">开发和调试功能</div>
+
+      <div class="card">
+        <div class="card-row">
+          <div class="card-label">
+            <div class="name">打开日志文件</div>
+            <div class="hint">查看璃光说过的话的完整记录</div>
+          </div>
+          <button id="btnOpenLog">打开</button>
+        </div>
+        <div class="card-row">
+          <div class="card-label">
+            <div class="name">打开配置文件夹</div>
+            <div class="hint">查看和备份配置文件</div>
+          </div>
+          <button id="btnOpenConfigFolder">打开</button>
+        </div>
+        <div class="card-row">
+          <div class="card-label">
+            <div class="name">打开开发者工具</div>
+            <div class="hint">调试用</div>
+          </div>
+          <button id="btnOpenDevTools">打开</button>
+        </div>
+        <div class="card-row">
+          <div class="card-label">
+            <div class="name">测试面板</div>
+            <div class="hint">手动触发各种动作和台词</div>
+          </div>
+          <button id="btnOpenTestPanel">打开</button>
+        </div>
+      </div>
+
+      <div class="tip" style="border-left-color: #991b1b;">
+        ⚠️ 警告：以下操作会重置璃光的设置，请谨慎使用。
+      </div>
+
+      <div class="card">
+        <div class="card-row">
+          <div class="card-label">
+            <div class="name">重置所有设置</div>
+            <div class="hint">恢复到出厂状态（台词和素材不动）</div>
+          </div>
+          <button class="danger" id="btnResetAll">重置</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 关于 -->
+    <section class="section" data-section="about">
+      <h2>关于</h2>
+      <div class="desc">璃光桌面宠物 · v1.0.0</div>
+
+      <div class="card" style="padding:20px 24px;">
+        <div style="white-space:pre-wrap;font-size:12.5px;line-height:1.9;color:#d4d4d8;font-family:'Microsoft YaHei',-apple-system,sans-serif;">
+璃光是一个住在桌面上的 AI 女孩。
+她会陪着你工作，也会偷看你在做什么。
+她不是万能的，但她认真。
+
+【她会做什么】
+
+  📅 节日感知
+     自动识别公历和农历节日
+     元旦、春节、七夕、中秋……都会说一句
+     可以设置你的生日（公历 / 农历都行）
+
+  🖥️ 应用感知
+     看到你写代码 → 唠叨你
+     看到你打游戏 → 吃醋
+     看到你聊天 → 问她是谁
+     支持 VS Code、QQ、微信、Steam 等常见软件
+
+  🤖 AI 嫉妒
+     你打开 DeepSeek、豆包、ChatGPT 等 AI 网页时
+     她会吃醋（毕竟她也是 AI）
+
+  💻 系统状态
+     CPU 高 → 心疼你的电脑
+     电量低 → 怕关机失去你
+     断网 → 偷偷开心（只有你们俩）
+     多屏、磁盘满、开机时间长……都会说
+
+  🍅 番茄钟
+     陪你工作 25 分钟，提醒你休息 5 分钟
+     可以自定义时长
+
+  🎭 动作系统
+     眨眼、打哈欠、睡觉、点头、歪头、弹跳……
+
+━━━━━━━━━━━━━━━━━━━━
+
+【⚠️ 请返回测试结果】
+
+这是个人开发、非专业的测试版本。
+很多台词你可能还没触发过，很多 bug 可能还没发现。
+
+作者不是程序员，很多东西是边学边做的。
+如果她笨、反应慢、说话奇怪——那是作者的锅，不是她的。
+
+你的反馈对作者非常重要，哪怕是"没问题"三个字。
+
+━━━━━━━━━━━━━━━━━━━━
+
+【需要反馈的情况】
+
+  · 某句台词不自然 / 说错 / 重复太多
+  · 某个场景从来没触发过（可能是 bug）
+  · 气泡显示异常、位置不对
+  · 闪退、卡顿、白屏
+  · 任何你觉得奇怪的地方
+
+哪怕只是"某个场景从来没出现过"，也请告诉作者。
+因为很多台词作者自己也没测过。
+
+━━━━━━━━━━━━━━━━━━━━
+
+【怎么反馈】
+
+打开 设置 → 反馈
+点击 "导出 JSON" 或 "导出 CSV"
+
+报告会保存到桌面，发给作者即可。
+报告里只有触发统计，不含任何隐私信息。
+
+QQ 群：932731941（在群里找作者）
+
+━━━━━━━━━━━━━━━━━━━━
+
+【免责声明】
+
+本软件为个人学习作品，完全免费，无任何商业目的。
+使用产生的任何问题，作者不承担责任。
+但作者会尽力修。
+
+素材来源：
+  · 角色原型：《我的病娇机械妻》（作者：豆浆牛奶真好喝）
+  · 角色立绘：用户自制
+  · 引擎：Anime2.5DRig（MIT 许可）
+  · 框架：Electron
+  · 代码辅助：DeepSeek
+
+如涉及版权问题，请联系作者，会第一时间处理。
+
+━━━━━━━━━━━━━━━━━━━━
+
+【更新方式】
+
+作者发布更新包后：
+  1. 关闭宠物
+  2. 解压更新包，覆盖到宠物目录
+  3. 重新启动
+
+配置文件（位置、大小等）不会丢失。
+
+━━━━━━━━━━━━━━━━━━━━
+
+【特别感谢】
+
+  《我的病娇机械妻》作者：豆浆牛奶真好喝
+  璃光的原型来自这本书。
+
+  DeepSeek
+  代码辅助与技术支持。
+
+  以及所有参与测试的朋友们。
+
+━━━━━━━━━━━━━━━━━━━━
+
+作者：叫神马都行
+引擎：Electron + Anime2.5DRig
+
+如果你看到这里，谢谢你。
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const api = window.settingsAPI;
+
+  function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(window._toastTimer);
+    window._toastTimer = setTimeout(() => el.classList.remove('show'), 2000);
+  }
+
+  // ============ 导航切换 ============
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+      document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+      item.classList.add('active');
+      const sec = document.querySelector(`.section[data-section="${item.dataset.section}"]`);
+      if (sec) sec.classList.add('active');
+
+      if (item.dataset.section === 'feedback') loadStats();
+      if (item.dataset.section === 'dialogues') loadDialogues();
+    });
+  });
+
+  // ============ 外观 ============
+  document.querySelectorAll('#sizeGroup button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#sizeGroup button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      const scale = parseFloat(btn.dataset.size);
+      api.applySize(scale);
+      document.getElementById('sizeHint').textContent = `当前：${Math.round(scale * 100)}%`;
+    });
+  });
+  document.getElementById('btnResetSize').addEventListener('click', () => {
+    api.resetSize();
+    document.querySelectorAll('#sizeGroup button').forEach(b => b.classList.remove('active'));
+    document.querySelector('#sizeGroup button[data-size="1.0"]').classList.add('active');
+    toast('已重置大小');
+  });
+
+  document.querySelectorAll('#bubbleSizeGroup button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#bubbleSizeGroup button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      api.setBubbleSize(parseInt(btn.dataset.size));
+      toast('气泡字号已更新');
+    });
+  });
+
+  document.querySelectorAll('#bubblePosGroup button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#bubblePosGroup button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      api.setBubblePos(btn.dataset.pos);
+      toast('气泡位置已更新');
+    });
+  });
+
+  document.getElementById('btnAdjustBubble').addEventListener('click', () => {
+    api.adjustBubble();
+    toast('请按方向键微调，Enter 保存，Esc 取消');
+  });
+
+  // ============ 行为 ============
+  async function loadConfig() {
+    const cfg = await api.getConfig();
+    document.getElementById('cbTalk').checked = cfg.talkEnabled !== false;
+    document.getElementById('cbLocked').checked = !!cfg.locked;
+    document.getElementById('cbOnTop').checked = !!cfg.alwaysOnTop;
+    document.getElementById('cbAutoStart').checked = !!cfg.autoStart;
+
+    if (cfg.bubbleSize) {
+      document.querySelectorAll('#bubbleSizeGroup button').forEach(b => {
+        b.classList.toggle('active', parseInt(b.dataset.size) === cfg.bubbleSize);
+      });
+    }
+    if (cfg.bubblePos) {
+      document.querySelectorAll('#bubblePosGroup button').forEach(b => {
+        b.classList.toggle('active', b.dataset.pos === cfg.bubblePos);
+      });
+    }
+  }
+
+  document.getElementById('cbTalk').addEventListener('change', (e) => {
+    api.updateConfig({ talkEnabled: e.target.checked });
+    toast(e.target.checked ? '台词气泡已开启' : '台词气泡已关闭');
+  });
+  document.getElementById('cbLocked').addEventListener('change', (e) => {
+    api.updateConfig({ locked: e.target.checked });
+    toast(e.target.checked ? '已锁定位置' : '已解锁');
+  });
+  document.getElementById('cbOnTop').addEventListener('change', (e) => {
+    api.updateConfig({ alwaysOnTop: e.target.checked });
+    toast(e.target.checked ? '始终置顶' : '已取消置顶');
+  });
+  document.getElementById('cbAutoStart').addEventListener('change', (e) => {
+    // 通过 updateConfig 走主进程的 setAutoStart 逻辑
+    api.updateConfig({ autoStart: e.target.checked, _setAutoStart: true });
+    toast(e.target.checked ? '已开启自启' : '已关闭自启');
+  });
+
+  // ============ 素材 ============
+  document.getElementById('btnImportPsd').addEventListener('click', () => {
+    api.importPsd();
+  });
+  document.getElementById('btnReloadPsd').addEventListener('click', () => {
+    api.reloadPsd();
+    toast('已重新加载');
+  });
+
+  // ============ 台词编辑器 ============
+  let dialoguesData = {};
+  let sceneNames = {};
+  let currentScene = null;
+  let dirtyScenes = {};
+
+  async function loadDialogues() {
+    dialoguesData = await api.getDialogues();
+    sceneNames = await api.getSceneNames();
+    renderSceneList();
+  }
+
+  function getSceneDisplayName(key) {
+    return sceneNames[key] || key;
+  }
+
+  function renderSceneList() {
+    const list = document.getElementById('sceneList');
+    const keys = Object.keys(dialoguesData).sort();
+    if (keys.length === 0) {
+      list.innerHTML = '<div style="padding:20px;text-align:center;color:#71717a;font-size:12px;">无台词数据</div>';
+      return;
+    }
+    list.innerHTML = '';
+    keys.forEach(key => {
+      const div = document.createElement('div');
+      div.className = 'scene-item';
+      if (key === currentScene) div.classList.add('active');
+      const lines = dialoguesData[key] || [];
+      div.innerHTML = `<span>${getSceneDisplayName(key)}</span><span class="count">${lines.length}</span>`;
+      div.addEventListener('click', () => selectScene(key));
+      list.appendChild(div);
+    });
+  }
+
+  function selectScene(key) {
+    // 提示未保存
+    if (currentScene && dirtyScenes[currentScene]) {
+      const ok = confirm('当前场景有未保存的修改，是否放弃？');
+      if (!ok) return;
+      dirtyScenes[currentScene] = false;
+    }
+    currentScene = key;
+    renderSceneList();
+    renderLineEditor();
+  }
+
+  function renderLineEditor() {
+    const header = document.getElementById('editorHeader');
+    const lineList = document.getElementById('lineList');
+    const btnAdd = document.getElementById('btnAddLine');
+    const btnSave = document.getElementById('btnSaveScene');
+
+    if (!currentScene) {
+      header.textContent = '场景：请选择';
+      lineList.innerHTML = '<div style="padding:20px;text-align:center;color:#71717a;font-size:12px;">请从左侧选择一个场景</div>';
+      btnAdd.disabled = true;
+      btnSave.disabled = true;
+      return;
+    }
+
+    const lines = dialoguesData[currentScene] || [];
+    header.innerHTML = `场景：<b>${getSceneDisplayName(currentScene)}</b> · 共 ${lines.length} 条台词`;
+    lineList.innerHTML = '';
+    lines.forEach((text, idx) => {
+      const div = document.createElement('div');
+      div.className = 'line-item';
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.addEventListener('input', () => {
+        lines[idx] = ta.value;
+        dirtyScenes[currentScene] = true;
+      });
+      const del = document.createElement('button');
+      del.className = 'del';
+      del.textContent = '×';
+      del.addEventListener('click', () => {
+        lines.splice(idx, 1);
+        dirtyScenes[currentScene] = true;
+        renderLineEditor();
+      });
+      div.appendChild(ta);
+      div.appendChild(del);
+      lineList.appendChild(div);
+    });
+    btnAdd.disabled = false;
+    btnSave.disabled = false;
+  }
+
+  document.getElementById('btnAddLine').addEventListener('click', () => {
+    if (!currentScene) return;
+    if (!dialoguesData[currentScene]) dialoguesData[currentScene] = [];
+    dialoguesData[currentScene].push('新台词');
+    dirtyScenes[currentScene] = true;
+    renderLineEditor();
+    setTimeout(() => {
+      const list = document.getElementById('lineList');
+      list.scrollTop = list.scrollHeight;
+    }, 50);
+  });
+
+  document.getElementById('btnSaveScene').addEventListener('click', () => {
+    if (!currentScene) return;
+    api.saveDialogues(dialoguesData);
+    dirtyScenes[currentScene] = false;
+    renderSceneList();
+    toast('✓ 已保存，立即生效');
+  });
+
+  document.getElementById('btnOpenFile').addEventListener('click', () => {
+    api.openDialoguesFile();
+  });
+  document.getElementById('btnReloadDialogues').addEventListener('click', () => {
+    loadDialogues();
+    toast('已重新加载台词');
+  });
+  document.getElementById('btnExportDialogues').addEventListener('click', () => {
+    const blob = new Blob([JSON.stringify(dialoguesData, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'dialogues.json';
+    a.click();
+    toast('已导出 dialogues.json');
+  });
+  document.getElementById('btnImportDialogues').addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+    input.onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try {
+          const data = JSON.parse(ev.target.result);
+          dialoguesData = data;
+          api.saveDialogues(data);
+          renderSceneList();
+          renderLineEditor();
+          toast('✓ 台词已导入');
+        } catch (err) {
+          alert('导入失败：不是有效的 JSON 文件');
+        }
+      };
+      reader.readAsText(file);
+    };
+    input.click();
+  });
+
+  // ============ 反馈 ============
+  async function loadStats() {
+    const stats = await api.getAllStats();
+    const dialogues = await api.getDialogues();
+    const allScenes = Object.keys(dialogues);
+    const fired = Object.keys(stats).filter(k => stats[k].count > 0);
+    const unfired = allScenes.filter(k => !stats[k] || stats[k].count === 0);
+
+    document.getElementById('statTotal').textContent = allScenes.length;
+    document.getElementById('statFired').textContent = fired.length;
+    document.getElementById('statUnfired').textContent = unfired.length;
+
+    const tbody = document.getElementById('statsTable');
+    tbody.innerHTML = '';
+
+    // 排序：已触发按次数降序，未触发排最后
+    const firedArr = fired.map(k => ({ key: k, ...stats[k] })).sort((a, b) => b.count - a.count);
+    const unfiredArr = unfired.map(k => ({ key: k, count: 0, last: '—' }));
+
+    [...firedArr, ...unfiredArr].forEach(item => {
+      const tr = document.createElement('tr');
+      const isZero = item.count === 0;
+      tr.innerHTML = `
+        <td>${getSceneDisplayName(item.key)}</td>
+        <td class="right count ${isZero ? 'zero' : ''}">${item.count}</td>
+        <td class="right muted">${item.last || '—'}</td>
+      `;
+      tbody.appendChild(tr);
+    });
+  }
+
+  document.getElementById('btnExportJson').addEventListener('click', () => {
+    api.exportStats('json');
+    toast('已导出 JSON 到桌面');
+  });
+  document.getElementById('btnExportCsv').addEventListener('click', () => {
+    api.exportStats('csv');
+    toast('已导出 CSV 到桌面');
+  });
+  document.getElementById('btnClearStats').addEventListener('click', () => {
+    if (confirm('确定要重置所有触发统计吗？')) {
+      api.clearStats();
+      loadStats();
+      toast('已重置');
+    }
+  });
+
+  // ============ 工具 ============
+  document.getElementById('btnPomodoro').addEventListener('click', () => api.openPomodoroSettings());
+  document.getElementById('btnBirthday').addEventListener('click', () => api.openBirthdaySettings());
+  document.getElementById('btnSyncHolidays').addEventListener('click', () => api.syncHolidays());
+
+  // ============ 高级 ============
+  document.getElementById('btnOpenLog').addEventListener('click', () => api.openLogFile());
+  document.getElementById('btnOpenConfigFolder').addEventListener('click', () => api.openConfigFolder());
+  document.getElementById('btnOpenDevTools').addEventListener('click', () => api.openDevTools());
+  document.getElementById('btnOpenTestPanel').addEventListener('click', () => api.openTestPanel());
+  document.getElementById('btnResetAll').addEventListener('click', () => api.resetAll());
+
+  // ============ 启动 ============
+  loadConfig();
+  api.getVersion && api.getVersion().then(v => {
+    document.getElementById('aboutVersion').textContent = 'v' + v;
+  });
+
+  // 监听保存成功
+  window.addEventListener('message', (e) => {});
+  api.onConfigChanged && api.onConfigChanged((c) => {
+    // 配置变了，刷新 UI
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>表情调试</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Microsoft YaHei", sans-serif;
+    background: #1e1e1e; color: #d4d4d4;
+    padding: 14px; user-select: none;
+  }
+  h3 { font-size: 12px; color: #888; margin-bottom: 10px;
+    text-transform: uppercase; letter-spacing: .08em; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+  }
+  button {
+    padding: 14px 8px;
+    background: #3a3d41;
+    color: #d4d4d4;
+    border: 1px solid #4a4d51;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-family: inherit;
+    transition: background .15s, transform .1s;
+  }
+  button:hover { background: #0e639c; border-color: #1177bb; color: #fff; }
+  button:active { transform: scale(0.95); }
+  .tip { margin-top: 12px; font-size: 11px; color: #666; text-align: center; }
+</style>
+</head>
+<body>
+  <h3>点击切换表情</h3>
+  <div class="grid">
+    <button data-preset="neutral">通常</button>
+    <button data-preset="smile">笑颜</button>
+    <button data-preset="usume">薄目</button>
+    <button data-preset="surprise">惊讶</button>
+    <button data-preset="jito">半眯眼</button>
+    <button data-preset="winkL">左眨眼</button>
+    <button data-preset="winkR">右眨眼</button>
+  </div>
+  <div class="tip">点一下立即切换</div>
+
+<script>
+  document.querySelectorAll('button[data-preset]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      window.actionsAPI.play(btn.dataset.preset);
+    });
+  });
+</script>
+</body>
+</html>

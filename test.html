@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<title>测试面板</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Microsoft YaHei", sans-serif;
+    background: #1e1e1e; color: #d4d4d4;
+    padding: 14px; user-select: none;
+  }
+  h3 {
+    font-size: 11px; color: #888;
+    margin: 10px 0 8px;
+    text-transform: uppercase; letter-spacing: .08em;
+    border-bottom: 1px solid #333;
+    padding-bottom: 4px;
+  }
+  h3:first-child { margin-top: 0; }
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+  }
+  button {
+    padding: 10px 6px;
+    background: #3a3d41; color: #d4d4d4;
+    border: 1px solid #4a4d51;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 12px;
+    font-family: inherit;
+    transition: background .15s, transform .1s;
+  }
+  button:hover { background: #0e639c; border-color: #1177bb; color: #fff; }
+  button:active { transform: scale(0.95); }
+  button.special { background: #7a4a1a; border-color: #8a5a2a; }
+  button.special:hover { background: #8a5a2a; }
+  .status {
+    margin-top: 12px; padding: 8px;
+    background: #1a1a1a; border-radius: 5px;
+    font-size: 11px; color: #4ec9b0;
+    text-align: center;
+    min-height: 22px;
+    word-break: break-all;
+  }
+</style>
+</head>
+<body>
+
+<h3>🎬 动作（关键帧）</h3>
+<div class="grid">
+  <button data-motion="yawn" class="special">打哈欠</button>
+  <button data-motion="sleep" class="special">睡觉</button>
+  <button data-motion="wake" class="special">醒来</button>
+  <button data-motion="nod">点头</button>
+  <button data-motion="shakeHead">摇头</button>
+  <button data-motion="tilt">歪头</button>
+  <button data-motion="surprise">惊讶</button>
+  <button data-motion="happy">开心跳</button>
+  <button data-motion="stretch">伸懒腰</button>
+  <button data-motion="idle">待机</button>
+</div>
+
+<h3>💬 台词（纯气泡）</h3>
+<div class="grid">
+  <button data-scene="morning">早安</button>
+  <button data-scene="noon">午间</button>
+  <button data-scene="night">深夜</button>
+  <button data-scene="idle">长时间不理</button>
+  <button data-scene="boot">开机问候</button>
+  <button data-scene="click">点击</button>
+</div>
+
+<div class="status" id="status">点按钮测试动作</div>
+
+<script>
+  const api = window.testAPI;
+  const statusEl = document.getElementById('status');
+  let dialogues = {};
+
+  fetch('dialogues.json')
+    .then(r => r.json())
+    .then(d => { dialogues = d; })
+    .catch(e => console.warn(e));
+
+  function setStatus(t) {
+    statusEl.textContent = t;
+    clearTimeout(window._statusTimer);
+    window._statusTimer = setTimeout(() => {
+      statusEl.textContent = '点按钮测试动作';
+    }, 3000);
+  }
+
+  // 动作按钮
+  document.querySelectorAll('[data-motion]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const name = btn.dataset.motion;
+      api.playAction(name);
+      setStatus('▶ ' + btn.textContent);
+    });
+  });
+
+  // 台词按钮
+  document.querySelectorAll('[data-scene]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const scene = btn.dataset.scene;
+      const list = dialogues[scene];
+      if (!list || list.length === 0) {
+        setStatus('场景 "' + scene + '" 无台词');
+        return;
+      }
+      const text = list[Math.floor(Math.random() * list.length)];
+      api.showBubble(text);
+      setStatus('💬 ' + text);
+    });
+  });
+</script>
+</body>
+</html>

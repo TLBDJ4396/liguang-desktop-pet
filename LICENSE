@@ -1,0 +1,31 @@
+MIT License
+
+Copyright (c) 2026 hakoniwa (Anime2.5DRig — 上游项目，原始许可证见 LICENSE-Anime2.5DRig)
+Copyright (c) 2026 AkiPaw (璃光桌面宠物 — 本仓库的桌宠应用层、台词整理与素材编排)
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+---------------------------------------------------------------------------
+关于素材与角色（不在 MIT 授权范围内）
+
+MIT 仅覆盖代码。角色「璃光」、《主人别怕，只是永远在一起》的原文台词与
+相关美术资源，版权归原作者「豆浆牛奶真好喝」所有。本仓库以非商业同人方式
+使用，不得用于任何商业用途。如原作者提出异议，请立即停止使用并删除相关素材。
+
+角色立绘 PSD 由本项目作者自行绘制/生成，随仓库一并提供，同样仅限非商业同人使用。
